@@ -1,19 +1,17 @@
+require('./config/loadEnv');
+
 const express = require('express');
-const Mongoose = require('mongoose');
-const session = require('express-session');
-const MongoStore = require('connect-mongo');
 const passport = require('passport');
-const dotenv = require('dotenv');
-const db_connect = require('./src/db/db_connect');
+
+const dbConnect = require('./src/db/db_connect');
 const passportConfig = require('./config/passport');
+
 const authRouter = require('./src/routes/auth');
 const homeRouter = require('./src/routes/home');
 
-dotenv.config({
-  path: './config/config.env',
-});
+const { session, store } = require('./src/middlware/session');
 
-db_connect();
+dbConnect();
 const app = express();
 app.use(
   session({
@@ -21,7 +19,7 @@ app.use(
     secret: 'secret',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
+    store,
   })
 );
 
@@ -30,7 +28,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(authRouter);
 app.use(homeRouter);
+app.use(express.json());
 if (process.env.NODE_ENV === 'development') {
+  // eslint-disable-next-line import/no-extraneous-dependencies
   const morgan = require('morgan');
   app.use(morgan('dev'));
 }

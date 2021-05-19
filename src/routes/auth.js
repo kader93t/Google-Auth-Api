@@ -1,6 +1,8 @@
 const express = require('express');
-const router = express.Router();
 const passport = require('passport');
+const { store } = require('../middlware/session');
+
+const router = express.Router();
 
 // Authentication with google
 // GET /auth/google
@@ -11,17 +13,30 @@ router.get(
 
 // Google authentication callback
 // GET /auth/google/callback
-
 router.get(
   '/auth/google/callback',
   passport.authenticate('google', {
     failureRedirect: '/',
   }),
   (req, res) => {
-    res.send({
-      status: 200,
-      message: 'LOGIN WITH GOOGLE SUCCESFULL',
+    store.collectionP.then((collection) => {
+      const sessions = collection.find({
+        // eslint-disable-next-line no-useless-escape
+        session: { $regex: `\"user\":\"${req.user.id}\"` },
+      });
+      sessions.forEach((session) => {
+        // eslint-disable-next-line no-underscore-dangle
+        if (session._id !== req.session.id) {
+          // eslint-disable-next-line no-underscore-dangle
+          store.destroy(session._id);
+        }
+      });
     });
+    res.redirect('/');
+    // res.send({
+    //   status: 200,
+    //   message: 'LOGIN WITH GOOGLE SUCCESFULL',
+    // });
   }
 );
 

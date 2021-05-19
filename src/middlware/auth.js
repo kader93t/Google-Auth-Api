@@ -1,8 +1,13 @@
 const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
-    return res.send('Authenticated'); //next();
+    return res.send({
+      status: 200,
+      message: 'Authenticated',
+    });
+    // next();
   }
-  res.send({
+  return res.status(401).send({
+    status: 401,
     message: 'Not Authenticated',
   });
 };
@@ -10,10 +15,12 @@ const isAuthenticated = (req, res, next) => {
 const isGuest = (req, res, next) => {
   if (req.isAuthenticated()) {
     return res.status(400).send({
+      status: 200,
       message: 'Authenticated',
     });
   }
-  res.send({
+  return res.status(401).send({
+    status: 401,
     message: 'Authenticated',
   });
 };
