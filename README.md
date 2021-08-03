@@ -19,3 +19,7 @@ Authentication (Login)
 Logout
 
      GET /auth/logout
+
+#### Features
+
+     Whene new login detected it will disconnect the old sessions
